@@ -13,8 +13,7 @@ import subprocess
 from afficher_statut_traitement import *
 from get_ODJ  import *
 from odj2contrats import *
-#from get_bitly.py import *
-from envoyer_twit import *
+from informer_nouveaux_contrats import *
 
 
 def main():
@@ -28,7 +27,8 @@ def main():
     
     a_verifier = [
                     ["Comité exécutif",
-                    "http://ville.montreal.qc.ca/portal/page?_pageid=5798,85931607&_dad=portal&_schema=PORTAL"]
+                    "http://ville.montreal.qc.ca/portal/page?_pageid=5798,85931607&_dad=portal&_schema=PORTAL",
+                    "CE"]
                  ]   
 
     
@@ -47,7 +47,7 @@ def main():
             odj2contrats(item)       #item[1] = lien de la page source du PDF
             
             #Envoyer un message par Twitter
-            #envoyer_twit("#ContratsOuvertsMtl: Nouveau contrat ")
+            informer_nouveaux_contrats(item)
             
     afficher_statut_traitement("Fin du traitement principal")
         
