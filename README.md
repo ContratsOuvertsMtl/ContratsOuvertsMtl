@@ -9,3 +9,4 @@ La page web du site de la Ville (http://bit.ly/OrdreDuJourCE) est vérifiée à 
 * * du Conseil municipal
 * * des arrondissements
 * Extraction des pages des appels d'offres, pour savoir encore plus tôt les contrats à venir
+* Lien vers les autres contrats du fournisseur
