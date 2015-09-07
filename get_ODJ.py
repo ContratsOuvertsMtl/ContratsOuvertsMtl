@@ -5,7 +5,7 @@
 """
 Télécharger les nouveaux fichiers PDF de l'ordre du jour sur le site de la Ville de Montréal
 
-Version 2.0, 2015-08-28
+Version 3.0, 2015-09-07
 Développé en Python 3.4
 Licence CC-BY-NC 4.0 Pascal Robichaud, pascal.robichaud.do101@gmail.com
 """
@@ -18,16 +18,7 @@ from bs4 import (
     BeautifulSoup,
     BeautifulStoneSoup, 
 )
-
-
-def afficher_statut_traitement(statut):
-
-    date_heure = datetime.datetime.now()
-    statut = statut.strip()
-    
-    print(statut + ": " + date_heure.strftime('%Y-%m-%d %H:%M:%S') )    
-    
-    return None
+from afficher_statut_traitement import *
     
     
 def get_liens_fichiers_ODJ(LIEN_PREFIXE, a_verifier):
@@ -81,8 +72,8 @@ def get_file(REPERTOIRE_PDF, lien_du_PDF):
     
     #fichier_PDF = os.path.join(REPERTOIRE_PDF, "\\odf.pdf")   ne marche pas avec os.path.join ??!!??
     fichier_PDF = REPERTOIRE_PDF + "\\odf.pdf"
-    fichier = wget.download(lien_du_PDF, fichier_PDF)                   #Référence: https://bitbucket.org/techtonik/python-wget/src
-
+    fichier = wget.download(lien_du_PDF, fichier_PDF)                   
+    
     afficher_statut_traitement("Fin   du téléchargement de " + lien_du_PDF)
     
     return None
@@ -97,6 +88,7 @@ def get_ODJ(url):
     
     #Répertoire de travail du script
     REPERTOIRE = "C:\\ContratsOuvertsMtl"
+    #REPERTOIRE = "C:\\ContratsOuvertsMtl\\Production"
 
     # Répertoire où les fichiers PDF sont enregistrés
     REPERTOIRE_PDF = REPERTOIRE + "\\Ordres_du_jour\\PDF"
@@ -112,7 +104,7 @@ def get_ODJ(url):
     
     #Télécharger le fichier s'il n'a pas déjà été traité
     for lien in liens_PDF:
-        print(lien)
+
         if not est_lien_traite(REPERTOIRE, lien):
 
             get_file(REPERTOIRE_PDF, lien)
@@ -121,6 +113,6 @@ def get_ODJ(url):
             
             reponse = True
 
-    afficher_statut_traitement("Fin  du traitement get_ODJ")
+    afficher_statut_traitement("Fin   du traitement get_ODJ")
     
     return reponse
