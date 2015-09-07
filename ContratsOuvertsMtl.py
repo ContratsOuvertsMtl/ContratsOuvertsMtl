@@ -3,7 +3,7 @@
 
 
 """
-Version 2.0, 2015-08-28
+Version 3.0, 2015-09-07
 Développé en Python 3.4
 Licence CC-BY-NC 4.0 Pascal Robichaud, pascal.robichaud.do101@gmail.com
 """
@@ -16,21 +16,25 @@ from odj2contrats import *
 from informer_nouveaux_contrats import *
 
 
-def main():
+def contrats_ouverts_mtl(**param):
 
     afficher_statut_traitement("Début du traitement principal")
-    #a_verifier instance, lien de la page web
+
+    #a_verifier: instance, 
+    #            lien de la page web,
+    #            acronynme
+                 
     #a_verifier = [
                     # ["Conseil municipal", 
-                    # "http://ville.montreal.qc.ca/portal/page?_pageid=5798,85945578&_dad=portal&_schema=PORTAL"]
+                    # "http://ville.montreal.qc.ca/portal/page?_pageid=5798,85945578&_dad=portal&_schema=PORTAL",
+                    # "CM"]
                  # ]  
     
     a_verifier = [
                     ["Comité exécutif",
-                    "http://ville.montreal.qc.ca/portal/page?_pageid=5798,85931607&_dad=portal&_schema=PORTAL",
-                    "CE"]
+                     "http://ville.montreal.qc.ca/portal/page?_pageid=5798,85931607&_dad=portal&_schema=PORTAL",
+                     "CE"]
                  ]   
-
     
     #Passer au travers des pages web à vérifier
     for item in a_verifier:
@@ -47,9 +51,10 @@ def main():
             odj2contrats(item)       #item[1] = lien de la page source du PDF
             
             #Envoyer un message par Twitter
-            informer_nouveaux_contrats(item)
+            if param["envoyer_twit"] == True:
+                informer_nouveaux_contrats(item)
             
-    afficher_statut_traitement("Fin du traitement principal")
+    afficher_statut_traitement("Fin   du traitement principal")
         
         
 if __name__ == '__main__':
