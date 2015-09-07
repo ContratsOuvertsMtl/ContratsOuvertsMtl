@@ -7,7 +7,7 @@
 Convertit la section 20 - Affaires contractuelles 
 du fichier PDF de l'ordre du jour en format texte.
 
-Version 2.0, 2015-08-28
+Version 3.0, 2015-09-07
 Développé en Python 2.7
 Licence CC-BY-NC 4.0 Pascal Robichaud, pascal.robichaud.do101@gmail.com
 """
@@ -88,12 +88,14 @@ def main():
 
     # Répertoire où les fichiers PDF sont enregistrés
     REPERTOIRE_PDF = "C:\\ContratsOuvertsMtl\\Ordres_du_jour\\PDF"
+    #REPERTOIRE_PDF = "C:\\ContratsOuvertsMtl\\Production\\Ordres_du_jour\\PDF"
     
     if not os.path.exists(REPERTOIRE_PDF):
         raise ValueError("Le repertoire " + REPERTOIRE_PDF + " pour les fichier PDF n'existe pas.")
 
     # Répertoire où le fichier texte résultant sera sauvegardé
     REPERTOIRE_TXT = "C:\\ContratsOuvertsMtl\\Ordres_du_jour\\TXT"
+    #REPERTOIRE_TXT = "C:\\ContratsOuvertsMtl\\Production\\Ordres_du_jour\\TXT"
     
     #Si le répertoire n'existe pas pour le fichier texte résultat, on le crée
     if not os.path.exists(REPERTOIRE_TXT):
