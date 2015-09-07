@@ -2,12 +2,10 @@
 # coding: utf8
 
 
-"""Extraire les contrats de l'ordre du jour du Comité exécutif
-Version 3.0, 2015-08-28
+"""Extraire les contrats de l'ordre du jour
+Version 3.0, 2015-09-07
 Développé en Python 3.4
 Licence CC-BY-NC 4.0 Pascal Robichaud, pascal.robichaud.do101@gmail.com
-
-Mettre les fichiers requis pour le traitement dans C:\ContratsOuvertsMtl\Ordres_du_jour\TXT
 """
 
 
@@ -319,19 +317,6 @@ def get_fournisseur(texte):
     prefixe_suffixe = [["Accorder un contrat à ", " pour "],
                        ["Accorder des contrat à ", " pour "],
                        ["Accorder un contrat à ", " d'une durée de "],
-                       # ["Accorder un contrat à "," pour le service d'entretien "],
-                       # ["Accorder des contrats à ", " pour le service d'entretien "],
-                       # ["Accorder un contrat à ", " pour le remplacement "],
-                       # ["Accorder un contrat à ", " pour la construction "],
-                       # ["Accorder un contrat à ", " pour la fabrication "],
-                       # ["Accorder un contrat à ", " pour la fourniture "],
-                       # ["Accorder un contrat à ", " pour le projet "],
-                       # ["Accorder un contrat à ", " pour la mise en place "],
-                       # ["Accorder un contrat à ", " pour la réfection "],
-                       # ["Accorder un contrat à ", " pour la reconstruction "],
-                       # ["Accorder un contrat à ", " pour la surveillance "],
-                       # ["Accorder un contrat à ", " pour l'exécution de travaux "],
-                       # ["Accorder un contrat à ", " pour la réalisation de travaux "],
                        ["Accorder un contrat à l'entreprise ", " pour les travaux de "],
                        ["Accorder un contrat à la firme ", " pour les travaux "],
                        ["Accorder un contrat à les ", " pour l'achat "],
@@ -498,7 +483,8 @@ def odj2contrats(a_verifier):
             # fcontrats_traites.writerow(["instance", "date_rencontre", "no_decision", "no_dossier", "instance_reference", "no_appel_offres", "nbr_soumissions", "pour", "texte_contrat", "fournisseur", "source", "date_traitement"])
             # contrats_traites.close()
        
-        contrats_traites = open("C:\\ContratsOuvertsMtl\\contrats_traites.csv", "w", encoding="utf-8")     
+        contrats_traites = open("C:\\ContratsOuvertsMtl\\contrats_traites.csv", "a", encoding="utf-8") 
+        #contrats_traites = open("C:\\ContratsOuvertsMtl\\Production\\contrats_traites.csv", "a", encoding="utf-8")        
         fcontrats_traites = csv.writer(contrats_traites, delimiter = ';') 
         fcontrats_traites.writerow(["instance", "date_rencontre", "no_decision", "titre", 
                                     "no_dossier", "instance_reference", "no_appel_offres", 
@@ -517,8 +503,6 @@ def odj2contrats(a_verifier):
                 
                     ligne2 = epurer_ligne(ligne)
 
-                    #print(ligne2)                                               #Affichage à l'écran pour faciliter le suivi et le débuggage
-                    
                     if not est_numero_de_page(ligne2):                          #Ne pas traiter les lignes qui donnes le numéro de page du PDF
                     
                         #Début d'une décision
@@ -635,11 +619,13 @@ def odj2contrats(a_verifier):
 
     
 REPERTOIRE_TXT = "C:\\ContratsOuvertsMtl\\Ordres_du_jour\\TXT"
-FICHIER_ORDRE_DU_JOUR = "C:\\ContratsOuvertsMtl\\Ordres_du_jour\\TXT\\CE_ODJ_LP_ORDI_2015-08-12_08h30_FR.txt" #Emplacement du fichier du l'ordre du jour
+#REPERTOIRE_TXT = "C:\\ContratsOuvertsMtl\\Production\\Ordres_du_jour\\TXT"
+#FICHIER_ORDRE_DU_JOUR = "C:\\ContratsOuvertsMtl\\Ordres_du_jour\\TXT\\CE_ODJ_LP_ORDI_2015-08-12_08h30_FR.txt" #Emplacement du fichier du l'ordre du jour
 FICHIER_FOURNISSEUR = "C:\\ContratsOuvertsMtl\\fournisseurs.csv"  						#Emplacement du fichier de la liste des founisseurs
+#FICHIER_FOURNISSEUR = "C:\\ContratsOuvertsMtl\\Production\\fournisseurs.csv"  			#Emplacement du fichier de la liste des founisseurs
 DATE_RENCONTRE = "2015-09-03"                           								#À changer
 PREFIXE_DECISION = "20." 
-STATUT = "Ordre du jour présenté"                               								#À changer au besoin
+STATUT = "Ordre du jour présenté"                               					    #À changer au besoin
 DATE_TRAITEMENT = left(str(datetime.datetime.today()),19)  								#Date à laquelle le traitement des contrats a été faite
  																						#Arranger le format AAAA-MM-JJ
                                                                                         
