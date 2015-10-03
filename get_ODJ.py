@@ -5,7 +5,7 @@
 """
 Télécharger les nouveaux fichiers PDF de l'ordre du jour sur le site de la Ville de Montréal
 
-Version 3.0, 2015-09-07
+Version 4.0, 2015-10-02
 Développé en Python 3.4
 Licence CC-BY-NC 4.0 Pascal Robichaud, pascal.robichaud.do101@gmail.com
 """
@@ -71,7 +71,7 @@ def get_file(REPERTOIRE_PDF, lien_du_PDF):
     afficher_statut_traitement("Début du téléchargement de " + lien_du_PDF)
     
     #fichier_PDF = os.path.join(REPERTOIRE_PDF, "\\odf.pdf")   ne marche pas avec os.path.join ??!!??
-    fichier_PDF = REPERTOIRE_PDF + "\\odf.pdf"
+    fichier_PDF = REPERTOIRE_PDF + "\\odj.pdf"
     fichier = wget.download(lien_du_PDF, fichier_PDF)                   
     
     afficher_statut_traitement("Fin   du téléchargement de " + lien_du_PDF)
@@ -88,7 +88,6 @@ def get_ODJ(url):
     
     #Répertoire de travail du script
     REPERTOIRE = "C:\\ContratsOuvertsMtl"
-    #REPERTOIRE = "C:\\ContratsOuvertsMtl\\Production"
 
     # Répertoire où les fichiers PDF sont enregistrés
     REPERTOIRE_PDF = REPERTOIRE + "\\Ordres_du_jour\\PDF"
