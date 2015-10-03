@@ -3,7 +3,7 @@
 
 
 """Extraire les contrats de l'ordre du jour
-Version 3.0, 2015-09-07
+Version 4.0, 2015-10-02
 Développé en Python 3.4
 Licence CC-BY-NC 4.0 Pascal Robichaud, pascal.robichaud.do101@gmail.com
 """
@@ -15,6 +15,10 @@ import time
 import csv                               
 import re
 from afficher_statut_traitement import *
+from left import *
+from right import *
+from mid import *
+from epurer_ligne import *
 
 
 def est_fichier_vide(path):
@@ -34,26 +38,6 @@ def strip_bom(fileName):
         f.write(text)
 
         
-#Fonction epurer_ligne
-def epurer_ligne(texte):
-
-    reponse = str(texte)
-    reponse = reponse.strip()
-    reponse = reponse.strip("[]")               #Épuration du texte extrait de l'ordre du jour
-    reponse = reponse.replace("  "," ")         #Pour une raison inconnu, il y a plusieurs 2 espaces consécutifs dans l'ordre du jour
-    reponse = reponse.replace(" , ",", ")       #Pour une raison inconnu, il y a plusieurs virgules précédées d'un espace
-    reponse = reponse.replace(";"," ")          #Enlever les ; pour éviter des problème avec le CSV qui sera généré     
-    reponse = reponse.replace("\""," ")
-    reponse = reponse.replace(u"\u2018", "'")
-    reponse = reponse.replace(u"\u2019", "'")
-    reponse = reponse.replace(u"\u2013", "")
-    reponse = reponse.replace(u"\x0c", "")
-    reponse = reponse.replace("\x0c", "")
-    reponse = reponse.replace("\n", "")
-
-    return reponse
-
- 
 def epurer_contrat(texte,
                    no_decision,
                    titre,
@@ -62,8 +46,8 @@ def epurer_contrat(texte,
 
     if texte:
     
-        reponse = texte
-        
+        reponse = texte.strip()
+
         if no_decision:
             reponse = reponse.replace(no_decision,"")
      
@@ -131,33 +115,56 @@ def est_no_decision(texte):
         if texte.startswith(PREFIXE_DECISION):
         
             reponse = True
-        
+    
     return reponse   
 
     
-def get_no_decision(texte):
+def get_no_decision(texte, instance):
 
     reponse = ""
     
     if texte:
     
         if est_no_decision(texte):
+        
+            if "CE" in instance:
 
-            if len(texte) >= 6:                             
+                if len(texte) >= 6 and texte.startswith("20."):                             
 
-                reponse = left(texte,6)
-  
+                    reponse = left(texte,6)
+            else:
+            
+                 if len(texte) >= 5 and texte.startswith("20."):                             
+
+                    reponse = left(texte,5)           
+            
     return reponse   
 
 
-def get_titre(texte, no_decision):
+def get_titre(instance, no_dossier, texte_contrat):
 
     reponse = ""
 
-    if texte:
+    if texte_contrat:
     
-        reponse = texte
-        reponse = reponse.replace(no_decision, "")
+        reponse = epurer_ligne(texte_contrat)
+        
+        if reponse.startswith("20."):
+            if "CE" in instance:
+                position_debut = 7
+            else:
+                position_debut = 6
+        else:
+            position_debut = 0
+        
+        nbr_caracteres = reponse.find(no_dossier) - position_debut - 1
+        
+        #En cas d'erreur pour initialiser nbr_caracteres,
+        #on le met égal à position_debut
+        if nbr_caracteres <= 0 or nbr_caracteres >= len(texte_contrat):
+            nbr_caracteres = 0
+
+        reponse = mid(texte_contrat, position_debut, nbr_caracteres)
         reponse = epurer_ligne(reponse)
         
     return reponse
@@ -341,7 +348,7 @@ def get_fournisseur(texte):
             
             if temp_fournisseur in texte:
                 reponse = temp_fournisseur
-   
+    
     #2. Le fournisseur n'a pas été trouvé dans la liste de référence
     #   on fait alors une recherche avec les termes clés 
     #   se trouvant avant et après le nom du fournisseur
@@ -373,7 +380,6 @@ def get_fournisseur(texte):
     return reponse  
 
     
-#Fonction get_nombre_fournisseurs(texte)
 def get_nombre_fournisseurs(texte, nbr_fournisseurs):
     
     reponse = nbr_fournisseurs
@@ -403,35 +409,7 @@ def get_montant(texte):
         else:
             reponse = ""
           
-    return reponse
-
-    
-#Fonction left
-def left(s, amount = 1, substring = ""):
-
-    if (substring == ""):
-        return s[:amount]
-    else:
-        if (len(substring) > amount):
-            substring = substring[:amount]
-        return substring + s[:-amount]
-         
- 
-#Fonction mid
-def mid(s, offset, amount):
-
-    return s[offset:offset+amount]
-
-                 
-#Fonction right
-def right(s, amount = 1, substring = ""):
-
-    if (substring == ""):
-        return s[-amount:]
-    else:
-        if (len(substring) > amount):
-            substring = substring[:amount]
-        return s[:-amount] + substring    
+    return reponse 
          
         
 #Fonction test_Debug
@@ -448,8 +426,8 @@ def odj2contrats(a_verifier):
 
     #Initialisation des variables
     
-    instance = a_verifier[0] 
-    source = a_verifier[1]
+    instance = a_verifier[1] 
+    source = a_verifier[3]
     
     no_decision = ""
     pour = ""
@@ -462,7 +440,6 @@ def odj2contrats(a_verifier):
     nbr_fournisseur = 0
     depense_totale = ""
     texte_contrat = ""
-    #source = "http://ville.montreal.qc.ca/sel/adi-public/afficherpdf/fichier.pdf?typeDoc=odj&doc=7182"
 
     #Indiquer le début du traitement
     afficher_statut_traitement("Début du traitement odj2contrats")
@@ -483,8 +460,7 @@ def odj2contrats(a_verifier):
             # fcontrats_traites.writerow(["instance", "date_rencontre", "no_decision", "no_dossier", "instance_reference", "no_appel_offres", "nbr_soumissions", "pour", "texte_contrat", "fournisseur", "source", "date_traitement"])
             # contrats_traites.close()
        
-        contrats_traites = open("C:\\ContratsOuvertsMtl\\contrats_traites.csv", "a", encoding="utf-8") 
-        #contrats_traites = open("C:\\ContratsOuvertsMtl\\Production\\contrats_traites.csv", "a", encoding="utf-8")        
+        contrats_traites = open("C:\\ContratsOuvertsMtl\\contrats_traites.csv", "w", encoding="utf-8") 
         fcontrats_traites = csv.writer(contrats_traites, delimiter = ';') 
         fcontrats_traites.writerow(["instance", "date_rencontre", "no_decision", "titre", 
                                     "no_dossier", "instance_reference", "no_appel_offres", 
@@ -496,23 +472,30 @@ def odj2contrats(a_verifier):
         with open(fichier_TXT, "r", encoding = "utf-8", ) as f:
 
             for ligne in f:
-            
-                ligne.strip()
-            
-                if ligne:                                                       #Ne pas traiter les lignes vides
-                
-                    ligne2 = epurer_ligne(ligne)
 
+                if isinstance(ligne, str):
+                    ligne.encode('utf8')
+                else:
+                    unicode(ligne).encode('utf8')
+                        
+                ligne.strip()
+
+                if ligne:                                                       #Ne pas traiter les lignes vides
+                    
+                    ligne2 = epurer_ligne(ligne)
+                    print(ligne2)
                     if not est_numero_de_page(ligne2):                          #Ne pas traiter les lignes qui donnes le numéro de page du PDF
                     
                         #Début d'une décision
                         if est_no_decision(ligne2):
-                            
+
                             #C'est une nouvelle décision,
                             #écrire le dernier contrat dans le fichier contrats_traites.txt
                             #Dans le traitement, sur la première décision, il n'y a encore rien à écrire
-                            if no_decision:        
-                               
+                            if no_decision:  
+
+                                print("--------")
+                                print(texte_contrat)
                                 no_appel_offre = getNo_appel_offres(texte_contrat)
                                 nbr_soumissions = getNbr_soumissions(texte_contrat)
                                 fournisseur = get_fournisseur(texte_contrat)
@@ -520,12 +503,14 @@ def odj2contrats(a_verifier):
                                 montant = get_montant(texte_contrat)
                                 type_contrat = get_type_contrat(texte_contrat)
                                 huis_clos = get_huis_clos(texte_contrat)
+                                titre = get_titre(instance, no_dossier, texte_contrat)
                                 texte_contrat = epurer_contrat(texte_contrat,
                                                                no_decision,
                                                                titre,
                                                                pour,
                                                                no_dossier)
                                 
+                              
                                 #Écrire le nom des champs dans le fichier contrats_traites.csv
                                 fcontrats_traites.writerow([instance, 
                                                             DATE_RENCONTRE, 
@@ -546,7 +531,7 @@ def odj2contrats(a_verifier):
                                                             DATE_TRAITEMENT])
                             
                             #Réinitialiser les variables
-                            no_decision = get_no_decision(ligne2)               #Nouveau numéro de décision
+                            no_decision = get_no_decision(ligne2, instance)               #Nouveau numéro de décision
                             titre = ""
                             pour = ""                                           #Initaliser le pour
                             no_dossier = ""                                     #Initaliser le numéro de dossier
@@ -559,6 +544,7 @@ def odj2contrats(a_verifier):
                             type_contrat = "",
                             depense_totale = ""
                             texte_contrat = ""                                  #Initaliser le texte du contrat
+                            huis_clos = ""
                                 
                         #L'instance référence du contrat
                         if est_instance_reference(ligne2):
@@ -575,16 +561,17 @@ def odj2contrats(a_verifier):
                             
                         #Numéro de décision
                         if est_no_decision(ligne2):
-                            no_decision = get_no_decision(ligne2)
-                            titre = get_titre(ligne2, no_decision)
-
+                            no_decision = get_no_decision(ligne2, instance)
+                            ligne2 = ligne2.replace(no_decision,"")         #Dans certains cas, le texte du contrat début sur la ligne du numéro de décision
+                            ligne2 = epurer_ligne(ligne2)
+                            
                         #Texte du contrat
-                        #if no_dossier and ligne2:                               #Ne pas mettre le 'pour' dans le texte du contrat
                         if not texte_contrat:
                             texte_contrat = ligne2                          #C'est le début du texte du contrat, évite d'avoir un espace au début
                         else:    
                             if not est_instance_reference(ligne2):
-                                texte_contrat = epurer_ligne(texte_contrat) + " " + ligne2
+                                if ligne2:
+                                    texte_contrat = epurer_ligne(texte_contrat) + " " + ligne2
                                        
         #Écrire le dernier contrat
         no_appel_offre = getNo_appel_offres(texte_contrat)
@@ -596,6 +583,7 @@ def odj2contrats(a_verifier):
                                        titre,
                                        pour,
                                        no_dossier)
+        titre = get_titre(instance, no_dossier, texte_contrat)
         fcontrats_traites.writerow([instance, 
                                     DATE_RENCONTRE, 
                                     no_decision, 
@@ -619,11 +607,8 @@ def odj2contrats(a_verifier):
 
     
 REPERTOIRE_TXT = "C:\\ContratsOuvertsMtl\\Ordres_du_jour\\TXT"
-#REPERTOIRE_TXT = "C:\\ContratsOuvertsMtl\\Production\\Ordres_du_jour\\TXT"
-#FICHIER_ORDRE_DU_JOUR = "C:\\ContratsOuvertsMtl\\Ordres_du_jour\\TXT\\CE_ODJ_LP_ORDI_2015-08-12_08h30_FR.txt" #Emplacement du fichier du l'ordre du jour
 FICHIER_FOURNISSEUR = "C:\\ContratsOuvertsMtl\\fournisseurs.csv"  						#Emplacement du fichier de la liste des founisseurs
-#FICHIER_FOURNISSEUR = "C:\\ContratsOuvertsMtl\\Production\\fournisseurs.csv"  			#Emplacement du fichier de la liste des founisseurs
-DATE_RENCONTRE = "2015-09-03"                           								#À changer
+DATE_RENCONTRE = "2015-09-01"                           								    #À changer
 PREFIXE_DECISION = "20." 
 STATUT = "Ordre du jour présenté"                               					    #À changer au besoin
 DATE_TRAITEMENT = left(str(datetime.datetime.today()),19)  								#Date à laquelle le traitement des contrats a été faite
@@ -631,12 +616,18 @@ DATE_TRAITEMENT = left(str(datetime.datetime.today()),19)  								#Date à laqu
                                                                                         
 def main():
 
-    #a_verifier instance, lien de la page web
+    #a_verifier : instance, 
+    #             lien de la page web
+    #             abréviation
+    
     a_verifier = [
-                    ["Conseil municipal", 
-                    "http://ville.montreal.qc.ca/portal/page?_pageid=5798,85945578&_dad=portal&_schema=PORTAL"]
+                    ["CE",
+                     "CE",
+                     "",
+                     "http://ville.montreal.qc.ca/sel/adi-public/afficherpdf/fichier.pdf?typeDoc=odj&doc=7301",
+                     ]
                  ]
-                 
+      
     odj2contrats(a_verifier[0])
     
     return None
