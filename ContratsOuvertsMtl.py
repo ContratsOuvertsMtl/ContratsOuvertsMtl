@@ -3,12 +3,12 @@
 
 
 """
-Version 3.0, 2015-09-07
+Version 4.0, 2015-10-02
 Développé en Python 3.4
 Licence CC-BY-NC 4.0 Pascal Robichaud, pascal.robichaud.do101@gmail.com
 """
-
-
+from sys import exit
+from csv import *
 import subprocess
 from afficher_statut_traitement import *
 from get_ODJ  import *
@@ -16,46 +16,44 @@ from odj2contrats import *
 from informer_nouveaux_contrats import *
 
 
-def contrats_ouverts_mtl(**param):
+def get_liens_a_verifier():
+
+    liens_a_verifier = []
+    
+    with open("C:\\ContratsOuvertsMtl\\liens_a_verifier.csv", "r") as csvfile:
+        myreader = csv.reader(csvfile, delimiter=',', quotechar='"')
+        for row in myreader:
+        
+            if "nom" not in row:
+                liens_a_verifier.append(row)
+    
+    return liens_a_verifier
+
+def contrats_ouverts_mtl():
 
     afficher_statut_traitement("Début du traitement principal")
-
-    #a_verifier: instance, 
-    #            lien de la page web,
-    #            acronynme
-                 
-    #a_verifier = [
-                    # ["Conseil municipal", 
-                    # "http://ville.montreal.qc.ca/portal/page?_pageid=5798,85945578&_dad=portal&_schema=PORTAL",
-                    # "CM"]
-                 # ]  
+      
+    a_verifier = get_liens_a_verifier()
     
-    a_verifier = [
-                    ["Comité exécutif",
-                     "http://ville.montreal.qc.ca/portal/page?_pageid=5798,85931607&_dad=portal&_schema=PORTAL",
-                     "CE"]
-                 ]   
+    print(a_verifier)
     
     #Passer au travers des pages web à vérifier
     for item in a_verifier:
     
+        print()
+        print(item)
+
         #Télécharger le(s) fichier(s) PDF de l'ordre du jour 
-        if get_ODJ(item[1]):
-        
-            #Convetir le(s) fichier(s) PDF en fichier(s) .txt
-            #PDFMiner qui est utilisé ne fonctionne qu'en Python 2.7
-            #D'où le fait qu'un subprocess soit utilisé
-            subprocess.call("c:\python27\python.exe c:\ContratsOuvertsMtl\odj2txt.py")
+        if get_ODJ(item[3]):
             
             #Extraire les contrats en format .csv
             odj2contrats(item)       #item[1] = lien de la page source du PDF
             
             #Envoyer un message par Twitter
-            if param["envoyer_twit"] == True:
-                informer_nouveaux_contrats(item)
+            informer_nouveaux_contrats()
             
     afficher_statut_traitement("Fin   du traitement principal")
         
         
 if __name__ == '__main__':
-    main()
+    contrats_ouverts_mtl()
