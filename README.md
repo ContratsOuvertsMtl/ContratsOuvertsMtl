@@ -4,8 +4,8 @@ Extraction des contrats à partir des PDF de l'ordre du jour du Comité exécuti
 ## À venir
 
 * Même principe avec l'ordre du jour
-* * du Conseil municipal
-* * des arrondissements
+** du Conseil municipal
+** des arrondissements
 * Extraction des pages des appels d'offres, pour savoir encore plus tôt les contrats à venir
 * Lien vers les autres contrats du fournisseur
 
