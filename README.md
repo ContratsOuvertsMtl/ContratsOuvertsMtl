@@ -1,6 +1,8 @@
 # ContratsOuvertsMtl
 Extraction des contrats à partir des PDF de l'ordre du jour du Comité exécutif.
 
+Le code a été séparé afin de faciliter les améliorations par la communauté.
+
 ## À venir
 
 * Même principe avec l'ordre du jour du Conseil municipal et des arrondissements
