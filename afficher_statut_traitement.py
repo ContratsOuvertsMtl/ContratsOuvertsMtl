@@ -4,7 +4,7 @@
 """
 Afficher le statut sur le traitement
 
-Version 3.0, 2015-09-07
+Version 4.0, 2015-10-02
 Développé en Python 3.4
 Licence CC-BY-NC 4.0 Pascal Robichaud, pascal.robichaud.do101@gmail.com
 """
