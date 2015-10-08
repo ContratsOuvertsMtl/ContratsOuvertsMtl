@@ -322,7 +322,7 @@ def get_fournisseur(texte):
     position_debut_suffixe = -1
     
     prefixe_suffixe = [["Accorder un contrat à ", " pour "],
-                       ["Accorder des contrat à ", " pour "],
+                       ["Accorder des contrats à ", " pour "],
                        ["Accorder un contrat à ", " d'une durée de "],
                        ["Accorder un contrat à l'entreprise ", " pour les travaux de "],
                        ["Accorder un contrat à la firme ", " pour les travaux "],
@@ -332,7 +332,7 @@ def get_fournisseur(texte):
                        ["Conclure avec la firme ", "une entente-cadre "],
                        ["Conclure 2 ententes-cadres avec "," pour des travaux "],
                        ["Conclure une entente-cadre de services professionnels avec ", " pour la réalisation "],
-                       [" Conclure avec ", " une entente-cadre "],
+                       ["Conclure avec ", " une entente-cadre "],
                        [" de gré à gré à la ", "  pour l'achat "],
                        ["Accorder un soutien financier de ", " pour réaliser  "]
                       ]
